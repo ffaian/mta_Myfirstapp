@@ -1,0 +1,66 @@
+ID: mta_Myfirstapp
+_schema-version: '2.1'
+parameters:
+  deploy_mode: html5-repo
+version: 0.0.1
+modules:
+  - name: mta_Myfirstapp_appRouter
+    type: approuter.nodejs
+    path: mta_Myfirstapp_appRouter
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: mta_Myfirstapp_html5_repo_runtime
+      - name: uaa_mta_Myfirstapp
+  - name: mta_Myfirstapp_ui_deployer
+    type: com.sap.html5.application-content
+    path: mta_Myfirstapp_ui_deployer
+    requires:
+      - name: mta_Myfirstapp_html5_repo_host
+    build-parameters:
+      requires:
+        - name: whocares
+          artifacts:
+            - './*'
+          target-path: resources/whocares
+  - name: db
+    type: hdb
+    path: db
+    requires:
+      - name: hdi_db
+  
+  - name: whocares
+    type: html5
+    path: whocares
+    build-parameters:
+      builder: grunt
+resources:
+  - name: mta_Myfirstapp_html5_repo_runtime
+    parameters:
+      service-plan: app-runtime
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: mta_Myfirstapp_html5_repo_host
+    parameters:
+      service-plan: app-host
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: uaa_mta_Myfirstapp
+    parameters:
+      path: ./xs-security.json
+      service-plan: application
+      service: xsuaa
+    type: org.cloudfoundry.managed-service
+  - name: dest_mta_Myfirstapp
+    parameters:
+      service-plan: lite
+      service: destination
+    type: org.cloudfoundry.managed-service
+  - name: hdi_db
+    parameters:
+      config:
+        schema: DB
+    properties:
+      hdi-container-name: '${service-name}'
+    type: com.sap.xs.hdi-container
